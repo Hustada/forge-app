@@ -82,7 +82,7 @@ export function saveTodayData(data: DayData): void {
   saveForgeData(forgeData);
 }
 
-export function isDayComplete(dayData: DayData, forgeData: ForgeData): boolean {
+export function isDayComplete(dayData: DayData, _forgeData: ForgeData): boolean {
   // Check all required tasks (water_goal and steps_goal are now just checkboxes in REQUIRED_TASKS)
   const allRequiredComplete = REQUIRED_TASKS.every(taskId => dayData.checks[taskId]);
   
@@ -113,7 +113,7 @@ export function updateStreak(forgeData: ForgeData): void {
   forgeData.streak = streak;
 }
 
-export function calculateProgress(dayData: DayData, forgeData: ForgeData): number {
+export function calculateProgress(dayData: DayData, _forgeData: ForgeData): number {
   // All required tasks count equally toward 100%
   const requiredComplete = REQUIRED_TASKS.filter(id => dayData.checks[id]).length;
   const progress = (requiredComplete / REQUIRED_TASKS.length) * 100;

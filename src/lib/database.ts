@@ -1,6 +1,5 @@
 import { supabase } from './supabase';
 import type { DayData } from './types';
-import { REQUIRED_TASKS } from './types';
 import * as storage from './storage';
 
 interface ForgeProgram {
@@ -13,19 +12,20 @@ interface ForgeProgram {
   reset_count: number;
 }
 
-interface DailyLog {
-  id: string;
-  user_id: string;
-  program_id: string;
-  date: string;
-  day_number: number;
-  checks: Record<string, boolean>;
-  custom_tasks: Record<string, string>;
-  steps_actual: number | null;
-  notes: string;
-  completed: boolean;
-  completed_at: string | null;
-}
+// Commented out until needed for type safety
+// interface DailyLog {
+//   id: string;
+//   user_id: string;
+//   program_id: string;
+//   date: string;
+//   day_number: number;
+//   checks: Record<string, boolean>;
+//   custom_tasks: Record<string, string>;
+//   steps_actual: number | null;
+//   notes: string;
+//   completed: boolean;
+//   completed_at: string | null;
+// }
 
 export class ForgeDatabase {
   private static instance: ForgeDatabase;

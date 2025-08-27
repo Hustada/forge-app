@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Droplet, Footprints, Plus, Minus } from 'lucide-react';
+import { Droplet, Footprints } from 'lucide-react';
 
 interface TrackerCardProps {
   type: 'water' | 'steps';
