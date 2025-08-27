@@ -9,6 +9,7 @@ import { PasswordReset } from './components/PasswordReset';
 import { PHASES } from './lib/types';
 import * as storage from './lib/storage';
 import { forgeDB } from './lib/database';
+import { supabase } from './lib/supabase';
 
 function AppContent() {
   const { user, loading, isOfflineMode } = useAuth();
@@ -127,6 +128,38 @@ function AppContent() {
     return (
       <div className="min-h-screen bg-void flex items-center justify-center">
         <div className="text-mournshard">Forging...</div>
+      </div>
+    );
+  }
+
+  // Check if user is logged in but email not verified
+  if (user && !user.email_confirmed_at && !isOfflineMode) {
+    return (
+      <div className="min-h-screen bg-void flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="forge-card p-6 w-full max-w-md text-center"
+        >
+          <h2 className="font-headline text-xl uppercase tracking-wide text-mournshard mb-4">
+            Verify Your Email
+          </h2>
+          <p className="text-text-muted mb-4">
+            Please confirm your email address to access The Forge.
+          </p>
+          <p className="text-xs text-text-muted">
+            Check your inbox for the confirmation link.
+          </p>
+          <button
+            onClick={async () => {
+              await supabase?.auth.signOut();
+              window.location.reload();
+            }}
+            className="mt-6 text-xs text-mournshard hover:text-ember underline"
+          >
+            Sign out and try another account
+          </button>
+        </motion.div>
       </div>
     );
   }

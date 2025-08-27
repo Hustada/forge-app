@@ -196,23 +196,54 @@ export class ForgeDatabase {
       const today = storage.getTodayKey();
       const isComplete = storage.isDayComplete(dayData, storage.loadForgeData());
 
-      const { error } = await supabase!
+      // First check if the log exists
+      const { data: existingLog } = await supabase!
         .from('daily_logs')
-        .upsert({
-          user_id: userId,
-          program_id: programId,
-          date: today,
-          checks: dayData.checks,
-          custom_tasks: dayData.customTasks,
-          steps_actual: dayData.stepsActual,
-          notes: dayData.notes,
-          completed: isComplete,
-          completed_at: isComplete ? new Date().toISOString() : null
-        }, {
-          onConflict: 'program_id,date'
-        });
+        .select('id')
+        .eq('program_id', programId)
+        .eq('date', today)
+        .single();
 
-      if (error) throw error;
+      if (existingLog) {
+        // Update existing log
+        const { error } = await supabase!
+          .from('daily_logs')
+          .update({
+            checks: dayData.checks,
+            custom_tasks: dayData.customTasks,
+            steps_actual: dayData.stepsActual,
+            notes: dayData.notes,
+            completed: isComplete,
+            completed_at: isComplete ? new Date().toISOString() : null
+          })
+          .eq('id', existingLog.id);
+        
+        if (error) throw error;
+      } else {
+        // Insert new log
+        const { data: program } = await supabase!
+          .from('forge_programs')
+          .select('current_day')
+          .eq('id', programId)
+          .single();
+        
+        const { error } = await supabase!
+          .from('daily_logs')
+          .insert({
+            user_id: userId,
+            program_id: programId,
+            date: today,
+            day_number: program?.current_day || 1,
+            checks: dayData.checks,
+            custom_tasks: dayData.customTasks,
+            steps_actual: dayData.stepsActual,
+            notes: dayData.notes,
+            completed: isComplete,
+            completed_at: isComplete ? new Date().toISOString() : null
+          });
+        
+        if (error) throw error;
+      }
 
       // Update program day count if completed
       if (isComplete) {
