@@ -1,0 +1,19 @@
+{
+  "name": "Forge",
+  "short_name": "Forge",
+  "description": "A ritual tool for forging discipline through daily phases",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0B0C",
+  "theme_color": "#C8A04A",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle"],
+  "lang": "en-US"
+}

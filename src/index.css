@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=Merriweather:wght@300;400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --forge-void: 11 11 12;
+    --forge-charred: 18 19 22;
+    --forge-steel: 22 24 29;
+    --forge-mournshard: 200 160 74;
+    --forge-ember: 245 158 11;
+    --forge-shadow: 139 30 46;
+  }
+
+  body {
+    @apply bg-void text-text-primary antialiased;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+    min-height: 100vh;
+    overscroll-behavior-y: contain;
+    margin: 0;
+  }
+
+  * {
+    -webkit-tap-highlight-color: rgba(200, 160, 74, 0.1);
+  }
+}
+
+@layer components {
+  .forge-card {
+    @apply bg-charred border border-steel-light rounded-2xl shadow-forge;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .forge-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(200, 160, 74, 0.2), transparent);
+  }
+
+  .forge-button {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+    @apply hover:scale-[1.02] active:scale-95;
+    @apply focus:outline-none focus:ring-2 focus:ring-mournshard focus:ring-opacity-30;
+  }
+
+  .forge-task {
+    @apply flex items-center space-x-3 p-3 rounded-lg transition-all duration-200;
+    @apply hover:bg-steel/50 cursor-pointer select-none;
+    min-height: 44px;
+  }
+
+  .forge-task-required {
+    @apply relative;
+  }
+
+  .forge-task-required::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    background-color: #C8A04A;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(200, 160, 74, 0.4);
+  }
+
+  .phase-won {
+    @apply relative overflow-hidden;
+    animation: ember-victory 2s ease-in-out;
+  }
+
+  .molten-progress {
+    @apply h-full bg-gradient-to-r from-mournshard to-ember rounded-full;
+    animation: molten-pour 0.6s ease-out;
+    box-shadow: 0 0 20px rgba(200, 160, 74, 0.4);
+  }
+
+  .ember-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle, #F59E0B, transparent);
+    border-radius: 50%;
+    animation: rise-and-fade 3s infinite;
+  }
+}
+
+@layer utilities {
+  .text-forge-glow {
+    text-shadow: 0 0 20px rgba(200, 160, 74, 0.5);
+  }
+
+  .ritual-icon {
+    @apply w-6 h-6 text-mournshard/70;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  }
+}
+
+@keyframes ember-victory {
+  0% {
+    background-color: rgba(245, 158, 11, 0);
+  }
+  50% {
+    background-color: rgba(245, 158, 11, 0.1);
+  }
+  100% {
+    background-color: rgba(245, 158, 11, 0);
+  }
+}
+
+@keyframes rise-and-fade {
+  0% {
+    transform: translateY(0) translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) translateX(10px);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes forge-heat {
+  0%, 100% {
+    filter: brightness(1) saturate(1);
+  }
+  50% {
+    filter: brightness(1.2) saturate(1.3);
+  }
+}
+
+.phase-active {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.phase-heating {
+  animation: forge-heat 3s ease-in-out infinite;
+}
