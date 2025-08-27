@@ -137,7 +137,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onClose }) => {
 
       {isSignUp && (
         <div className="mt-6 p-4 bg-steel/50 rounded border border-steel-light">
-          <p className="text-xs text-mournshard font-wisdom italic">
+          <p className="text-xs text-mournshard font-wisdom italic text-center">
             "Power lives in repetition, not in flashes."
           </p>
         </div>
