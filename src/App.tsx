@@ -110,8 +110,11 @@ function AppContent() {
   const progress = storage.calculateProgress(dayData, forgeData);
   const dayComplete = storage.isDayComplete(dayData, forgeData);
 
-  // Check if this is an auth confirmation callback
-  if (window.location.hash?.includes('type=signup') || window.location.hash?.includes('type=recovery')) {
+  // Check if this is an auth confirmation callback or error
+  if (window.location.hash?.includes('type=signup') || 
+      window.location.hash?.includes('type=recovery') ||
+      window.location.hash?.includes('error=') ||
+      window.location.hash?.includes('error_code=')) {
     return <AuthConfirm />;
   }
 

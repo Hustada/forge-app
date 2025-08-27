@@ -10,11 +10,19 @@ export const AuthConfirm: React.FC = () => {
     // Check if we're on the confirmation page
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const error = hashParams.get('error');
+    const errorCode = hashParams.get('error_code');
     const errorDescription = hashParams.get('error_description');
     
-    if (error) {
+    if (error || errorCode) {
       setStatus('error');
-      setMessage(errorDescription || 'Confirmation failed');
+      // Decode the error description and make it more user-friendly
+      const decodedError = errorDescription ? decodeURIComponent(errorDescription.replace(/\+/g, ' ')) : 'Confirmation failed';
+      
+      if (errorCode === 'otp_expired') {
+        setMessage('This confirmation link has expired. Please sign up again to receive a new link.');
+      } else {
+        setMessage(decodedError);
+      }
     } else if (window.location.hash.includes('type=signup')) {
       setStatus('success');
       setMessage('Email confirmed! You can now sign in.');
@@ -22,6 +30,10 @@ export const AuthConfirm: React.FC = () => {
       setTimeout(() => {
         window.location.href = '/';
       }, 3000);
+    } else {
+      // No recognized parameters, show generic error
+      setStatus('error');
+      setMessage('Invalid confirmation link.');
     }
   }, []);
 
@@ -47,14 +59,21 @@ export const AuthConfirm: React.FC = () => {
               Forged
             </h2>
             <p className="text-text-muted">{message}</p>
+            <p className="text-xs text-text-muted mt-4">Redirecting...</p>
           </>
         ) : (
           <>
             <XCircle className="w-12 h-12 text-shadow mx-auto mb-4" />
             <h2 className="font-headline text-xl uppercase tracking-wide text-shadow mb-2">
-              Failed
+              Link Expired
             </h2>
-            <p className="text-text-muted">{message}</p>
+            <p className="text-text-muted mb-6">{message}</p>
+            <button
+              onClick={() => window.location.href = '/'}
+              className="forge-button bg-mournshard text-void hover:bg-ember px-6 py-2"
+            >
+              Back to The Forge
+            </button>
           </>
         )}
       </motion.div>
