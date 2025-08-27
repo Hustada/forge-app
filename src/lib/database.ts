@@ -299,6 +299,57 @@ export class ForgeDatabase {
     await this.saveTodayLog(userId, programId, dayData);
   }
 
+  // Complete the day - check all required tasks
+  async completeDay(userId: string, programId: string): Promise<void> {
+    const dayData = await this.getTodayLog(userId, programId);
+    if (!dayData) return;
+
+    // Check all required tasks
+    const { REQUIRED_TASKS } = await import('./types');
+    REQUIRED_TASKS.forEach(taskId => {
+      dayData.checks[taskId] = true;
+    });
+
+    await this.saveTodayLog(userId, programId, dayData);
+  }
+
+  // Start over - reset to Day 1
+  async startOver(userId: string): Promise<void> {
+    if (this.offlineMode) {
+      storage.resetToday();
+      return;
+    }
+
+    try {
+      // Mark current program as failed
+      const currentProgram = await this.getActiveProgram(userId);
+      if (currentProgram) {
+        await supabase!
+          .from('forge_programs')
+          .update({ 
+            failed_at: new Date().toISOString()
+          })
+          .eq('id', currentProgram.id);
+      }
+
+      // Create a new program
+      const { error } = await supabase!
+        .from('forge_programs')
+        .insert({
+          user_id: userId,
+          current_day: 1,
+          reset_count: (currentProgram?.reset_count || 0) + 1
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error starting over:', error);
+      storage.resetToday();
+    }
+  }
+
   // Get program stats
   async getProgramStats(userId: string): Promise<{
     currentDay: number;

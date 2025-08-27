@@ -108,6 +108,41 @@ function AppContent() {
     }
   };
 
+  const handleCompleteDay = async () => {
+    if (user && programId && !isOfflineMode) {
+      await forgeDB.completeDay(user.id, programId);
+      const todayLog = await forgeDB.getTodayLog(user.id, programId);
+      if (todayLog) setDayData(todayLog);
+    } else {
+      // Complete all tasks in offline mode
+      const { REQUIRED_TASKS } = await import('./lib/types');
+      REQUIRED_TASKS.forEach(taskId => {
+        storage.toggleTask(taskId);
+      });
+      setDayData(storage.getTodayData());
+      setForgeData(storage.loadForgeData());
+    }
+  };
+
+  const handleStartOver = async () => {
+    if (user && !isOfflineMode) {
+      await forgeDB.startOver(user.id);
+      // Get the new program
+      const program = await forgeDB.getActiveProgram(user.id);
+      if (program) {
+        setProgramId(program.id);
+        const todayLog = await forgeDB.getTodayLog(user.id, program.id);
+        if (todayLog) setDayData(todayLog);
+      }
+      const programStats = await forgeDB.getProgramStats(user.id);
+      setStats(programStats);
+    } else {
+      storage.resetToday();
+      setDayData(storage.getTodayData());
+      setForgeData(storage.loadForgeData());
+    }
+  };
+
 
   const progress = storage.calculateProgress(dayData, forgeData);
   const dayComplete = storage.isDayComplete(dayData, forgeData);
@@ -201,6 +236,8 @@ function AppContent() {
         dayComplete={dayComplete}
         onSettings={() => setShowSettings(true)}
         onReset={handleReset}
+        onCompleteDay={handleCompleteDay}
+        onStartOver={handleStartOver}
       />
 
       {/* Phases */}

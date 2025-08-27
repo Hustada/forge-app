@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Settings, RotateCcw } from 'lucide-react';
+import { Flame, Settings, RotateCcw, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface ProgressHeaderProps {
   currentDay: number;
@@ -9,9 +9,21 @@ interface ProgressHeaderProps {
   dayComplete: boolean;
   onSettings?: () => void;
   onReset?: () => void;
+  onCompleteDay?: () => void;
+  onStartOver?: () => void;
 }
 
-export const ProgressHeader: React.FC<ProgressHeaderProps> = ({ currentDay, totalResets, progress, dayComplete, onSettings, onReset }) => {
+export const ProgressHeader: React.FC<ProgressHeaderProps> = ({ 
+  currentDay, 
+  totalResets, 
+  progress, 
+  dayComplete, 
+  onSettings, 
+  onReset,
+  onCompleteDay,
+  onStartOver 
+}) => {
+  const [showConfirmReset, setShowConfirmReset] = useState(false);
   const getMessage = () => {
     if (dayComplete) return "The Forge Holds. Victory is yours.";
     if (progress >= 80) return "The day bends to your will.";
@@ -35,6 +47,26 @@ export const ProgressHeader: React.FC<ProgressHeaderProps> = ({ currentDay, tota
           
           {/* Action buttons */}
           <div className="flex gap-2">
+            {onCompleteDay && !dayComplete && (
+              <motion.button
+                onClick={onCompleteDay}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 rounded-lg bg-mournshard/20 hover:bg-mournshard/30 transition-colors"
+                title="Mark Day Complete (Check all tasks)"
+              >
+                <CheckCircle className="w-5 h-5 text-mournshard" />
+              </motion.button>
+            )}
+            {onStartOver && (
+              <motion.button
+                onClick={() => setShowConfirmReset(true)}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 rounded-lg bg-shadow/20 hover:bg-shadow/30 transition-colors"
+                title="Start Over (Reset to Day 1)"
+              >
+                <AlertCircle className="w-5 h-5 text-shadow" />
+              </motion.button>
+            )}
             {onReset && (
               <motion.button
                 onClick={onReset}
@@ -135,6 +167,51 @@ export const ProgressHeader: React.FC<ProgressHeaderProps> = ({ currentDay, tota
           </motion.div>
         )}
       </div>
+
+      {/* Confirm Reset Modal */}
+      {showConfirmReset && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 bg-void/95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={() => setShowConfirmReset(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            className="forge-card p-6 w-full max-w-sm text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AlertCircle className="w-12 h-12 text-shadow mx-auto mb-4" />
+            <h2 className="font-headline text-xl uppercase tracking-wide text-shadow mb-2">
+              Start Over?
+            </h2>
+            <p className="text-text-muted mb-2">
+              This will reset you to Day 1 and increase your reset count.
+            </p>
+            <p className="text-xs text-mournshard mb-6">
+              "The Forge demands commitment."
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirmReset(false)}
+                className="flex-1 forge-button bg-steel text-text-primary hover:bg-steel-light py-2"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  onStartOver?.();
+                  setShowConfirmReset(false);
+                }}
+                className="flex-1 forge-button bg-shadow text-white hover:bg-shadow/80 py-2"
+              >
+                Start Over
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 };
