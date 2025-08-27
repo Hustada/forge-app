@@ -22,8 +22,20 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Service Worker Registration -->
+    <!-- Clear existing service workers -->
     <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+            console.log('Unregistered service worker:', registration);
+          }
+        });
+      }
+    </script>
+    
+    <!-- Service Worker Registration - Disabled for now due to caching issues -->
+    <!-- <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
@@ -31,6 +43,6 @@
             .catch(error => console.log('Forge SW registration failed:', error));
         });
       }
-    </script>
+    </script> -->
   </body>
 </html>
