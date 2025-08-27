@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ProgressHeader } from './components/ProgressHeader';
 import { PhaseCard } from './components/PhaseCard';
 import { AuthForm } from './components/AuthForm';
+import { AuthConfirm } from './components/AuthConfirm';
 import { PHASES } from './lib/types';
 import * as storage from './lib/storage';
 import { forgeDB } from './lib/database';
@@ -108,6 +109,11 @@ function AppContent() {
 
   const progress = storage.calculateProgress(dayData, forgeData);
   const dayComplete = storage.isDayComplete(dayData, forgeData);
+
+  // Check if this is an auth confirmation callback
+  if (window.location.hash?.includes('type=signup') || window.location.hash?.includes('type=recovery')) {
+    return <AuthConfirm />;
+  }
 
   if (loading) {
     return (
