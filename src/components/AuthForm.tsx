@@ -8,12 +8,28 @@ interface AuthFormProps {
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({ onClose }) => {
-  const { signIn, signUp, isOfflineMode } = useAuth();
+  const { signIn, signUp, resendConfirmation, isOfflineMode } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+
+  const handleResendConfirmation = async () => {
+    setError('');
+    setLoading(true);
+    
+    try {
+      await resendConfirmation(email);
+      setError('Confirmation email sent! Check your inbox.');
+      setShowResend(false);
+    } catch (err: any) {
+      setError('Failed to resend confirmation email. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +45,20 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onClose }) => {
         onClose();
       }
     } catch (err: any) {
-      setError(err.message);
+      // Handle specific error cases
+      if (err.message?.includes('Email not confirmed')) {
+        setError('Please confirm your email first. Check your inbox for the confirmation link.');
+        setShowResend(true);
+      } else if (err.message?.includes('User already registered')) {
+        setError('This email is already registered. Please sign in instead.');
+        setShowResend(false);
+      } else if (err.message?.includes('Invalid login credentials')) {
+        setError('Invalid email or password.');
+        setShowResend(false);
+      } else {
+        setError(err.message);
+        setShowResend(false);
+      }
     } finally {
       setLoading(false);
     }
@@ -108,9 +137,21 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onClose }) => {
         </div>
 
         {error && (
-          <p className={`text-sm ${error.includes('email') ? 'text-mournshard' : 'text-shadow'}`}>
-            {error}
-          </p>
+          <div>
+            <p className={`text-sm ${error.includes('email') || error.includes('sent') ? 'text-mournshard' : 'text-shadow'}`}>
+              {error}
+            </p>
+            {showResend && (
+              <button
+                type="button"
+                onClick={handleResendConfirmation}
+                disabled={loading}
+                className="mt-2 text-xs text-mournshard hover:text-ember underline"
+              >
+                Resend confirmation email
+              </button>
+            )}
+          </div>
         )}
 
         <button

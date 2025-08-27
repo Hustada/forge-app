@@ -9,6 +9,7 @@ interface AuthContextType {
   signUp: (email: string, password: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resendConfirmation: (email: string) => Promise<void>;
   isOfflineMode: boolean;
 }
 
@@ -79,6 +80,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error;
   };
 
+  const resendConfirmation = async (email: string) => {
+    if (!supabase) throw new Error('Running in offline mode');
+    
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email,
+    });
+    
+    if (error) throw error;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -88,6 +100,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signUp,
         signIn,
         signOut,
+        resendConfirmation,
         isOfflineMode,
       }}
     >
