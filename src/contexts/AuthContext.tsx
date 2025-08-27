@@ -10,6 +10,8 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resendConfirmation: (email: string) => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
   isOfflineMode: boolean;
 }
 
@@ -91,6 +93,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) throw error;
   };
 
+  const resetPassword = async (email: string) => {
+    if (!supabase) throw new Error('Running in offline mode');
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/#type=recovery`,
+    });
+    
+    if (error) throw error;
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    if (!supabase) throw new Error('Running in offline mode');
+    
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    
+    if (error) throw error;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -101,6 +123,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signOut,
         resendConfirmation,
+        resetPassword,
+        updatePassword,
         isOfflineMode,
       }}
     >

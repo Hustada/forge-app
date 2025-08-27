@@ -5,6 +5,7 @@ import { ProgressHeader } from './components/ProgressHeader';
 import { PhaseCard } from './components/PhaseCard';
 import { AuthForm } from './components/AuthForm';
 import { AuthConfirm } from './components/AuthConfirm';
+import { PasswordReset } from './components/PasswordReset';
 import { PHASES } from './lib/types';
 import * as storage from './lib/storage';
 import { forgeDB } from './lib/database';
@@ -110,9 +111,13 @@ function AppContent() {
   const progress = storage.calculateProgress(dayData, forgeData);
   const dayComplete = storage.isDayComplete(dayData, forgeData);
 
+  // Check if this is a password reset page
+  if (window.location.hash?.includes('type=recovery') && !window.location.hash?.includes('error')) {
+    return <PasswordReset />;
+  }
+  
   // Check if this is an auth confirmation callback or error
   if (window.location.hash?.includes('type=signup') || 
-      window.location.hash?.includes('type=recovery') ||
       window.location.hash?.includes('error=') ||
       window.location.hash?.includes('error_code=')) {
     return <AuthConfirm />;

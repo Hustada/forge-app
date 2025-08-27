@@ -8,8 +8,9 @@ interface AuthFormProps {
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({ onClose }) => {
-  const { signIn, signUp, resendConfirmation, isOfflineMode } = useAuth();
+  const { signIn, signUp, resendConfirmation, resetPassword, isOfflineMode } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -37,7 +38,14 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onClose }) => {
     setLoading(true);
 
     try {
-      if (isSignUp) {
+      if (isForgotPassword) {
+        await resetPassword(email);
+        setError('Password reset email sent! Check your inbox.');
+        setTimeout(() => {
+          setIsForgotPassword(false);
+          setError('');
+        }, 3000);
+      } else if (isSignUp) {
         await signUp(email, password);
         setError('Check your email to confirm your account.');
       } else {
@@ -105,7 +113,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onClose }) => {
     >
       <div className="flex justify-between items-center mb-6">
         <h2 className="font-headline text-xl uppercase tracking-wide text-mournshard">
-          {isSignUp ? 'Begin The Forge' : 'Return to The Forge'}
+          {isForgotPassword ? 'Reset Password' : isSignUp ? 'Begin The Forge' : 'Return to The Forge'}
         </h2>
         <button onClick={onClose} className="p-2 hover:bg-steel rounded">
           <X className="w-5 h-5 text-text-muted" />
@@ -124,17 +132,19 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onClose }) => {
           />
         </div>
         
-        <div>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Password"
-            required
-            minLength={6}
-            className="w-full px-4 py-3 bg-steel border border-steel-light rounded text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-mournshard"
-          />
-        </div>
+        {!isForgotPassword && (
+          <div>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              required
+              minLength={6}
+              className="w-full px-4 py-3 bg-steel border border-steel-light rounded text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-mournshard"
+            />
+          </div>
+        )}
 
         {error && (
           <div>
@@ -160,20 +170,50 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onClose }) => {
           className="forge-button bg-mournshard text-void hover:bg-ember w-full py-3 flex items-center justify-center gap-2"
         >
           <Flame className="w-5 h-5" />
-          {loading ? 'Forging...' : (isSignUp ? 'Start 90-Day Forge' : 'Enter The Forge')}
+          {loading ? 'Forging...' : 
+           isForgotPassword ? 'Send Reset Link' :
+           isSignUp ? 'Start 90-Day Forge' : 'Enter The Forge'}
         </button>
       </form>
 
-      <div className="mt-6 text-center">
-        <button
-          onClick={() => {
-            setIsSignUp(!isSignUp);
-            setError('');
-          }}
-          className="text-text-muted text-sm hover:text-mournshard"
-        >
-          {isSignUp ? 'Already forged? Sign in' : 'New to The Forge? Begin your journey'}
-        </button>
+      <div className="mt-6 text-center space-y-2">
+        {!isForgotPassword && (
+          <>
+            <button
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError('');
+                setShowResend(false);
+              }}
+              className="text-text-muted text-sm hover:text-mournshard block w-full"
+            >
+              {isSignUp ? 'Already forged? Sign in' : 'New to The Forge? Begin your journey'}
+            </button>
+            {!isSignUp && (
+              <button
+                onClick={() => {
+                  setIsForgotPassword(true);
+                  setError('');
+                  setShowResend(false);
+                }}
+                className="text-text-muted text-xs hover:text-mournshard"
+              >
+                Forgot your password?
+              </button>
+            )}
+          </>
+        )}
+        {isForgotPassword && (
+          <button
+            onClick={() => {
+              setIsForgotPassword(false);
+              setError('');
+            }}
+            className="text-text-muted text-sm hover:text-mournshard"
+          >
+            Back to sign in
+          </button>
+        )}
       </div>
 
       {isSignUp && (
