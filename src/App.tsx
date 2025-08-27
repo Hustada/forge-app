@@ -131,7 +131,7 @@ function AppContent() {
               THE FORGE
             </h1>
             <p className="text-text-muted mb-8 font-wisdom italic">
-              "90 days. No excuses. Miss one, start over."
+              "Discipline or decay."
             </p>
             <button
               onClick={() => setShowAuth(true)}
