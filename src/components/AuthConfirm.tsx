@@ -1,42 +1,75 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export const AuthConfirm: React.FC = () => {
   const [status, setStatus] = useState<'confirming' | 'success' | 'error'>('confirming');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // Check if we're on the confirmation page
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const error = hashParams.get('error');
-    const errorCode = hashParams.get('error_code');
-    const errorDescription = hashParams.get('error_description');
-    const accessToken = hashParams.get('access_token');
-    const type = hashParams.get('type');
-    
-    if (error || errorCode) {
-      setStatus('error');
-      // Decode the error description and make it more user-friendly
-      const decodedError = errorDescription ? decodeURIComponent(errorDescription.replace(/\+/g, ' ')) : 'Confirmation failed';
+    const handleConfirmation = async () => {
+      // Check if we're on the confirmation page
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const error = hashParams.get('error');
+      const errorCode = hashParams.get('error_code');
+      const errorDescription = hashParams.get('error_description');
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      const type = hashParams.get('type');
       
-      if (errorCode === 'otp_expired') {
-        setMessage('This confirmation link has expired. Please sign up again to receive a new link.');
+      if (error || errorCode) {
+        setStatus('error');
+        // Decode the error description and make it more user-friendly
+        const decodedError = errorDescription ? decodeURIComponent(errorDescription.replace(/\+/g, ' ')) : 'Confirmation failed';
+        
+        if (errorCode === 'otp_expired') {
+          setMessage('This confirmation link has expired. Please sign up again to receive a new link.');
+        } else {
+          setMessage(decodedError);
+        }
+      } else if (accessToken && refreshToken) {
+        // We have tokens - set the session
+        try {
+          const { data, error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          if (sessionError) {
+            console.error('Error setting session:', sessionError);
+            setStatus('error');
+            setMessage('Failed to sign you in. Please try logging in manually.');
+          } else {
+            console.log('Session set successfully:', data);
+            setStatus('success');
+            setMessage('Email confirmed! Signing you in...');
+            // Redirect to home after a brief moment
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 1500);
+          }
+        } catch (err) {
+          console.error('Error in confirmation:', err);
+          setStatus('error');
+          setMessage('An error occurred. Please try logging in manually.');
+        }
+      } else if (type === 'signup' || window.location.hash.includes('type=signup')) {
+        // Legacy handling without tokens
+        setStatus('success');
+        setMessage('Email confirmed! Please sign in with your credentials.');
+        // Redirect to home after 3 seconds
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 3000);
       } else {
-        setMessage(decodedError);
+        // No recognized parameters, show generic error
+        setStatus('error');
+        setMessage('Invalid confirmation link.');
       }
-    } else if (accessToken || type === 'signup' || window.location.hash.includes('type=signup')) {
-      setStatus('success');
-      setMessage('Email confirmed! Signing you in...');
-      // Redirect to home after 2 seconds
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 2000);
-    } else {
-      // No recognized parameters, show generic error
-      setStatus('error');
-      setMessage('Invalid confirmation link.');
-    }
+    };
+    
+    handleConfirmation();
   }, []);
 
   if (status === 'confirming') {

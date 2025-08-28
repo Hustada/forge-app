@@ -59,15 +59,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Use the current origin for redirect to handle both localhost and production
     const redirectTo = `${window.location.origin}/#type=signup`;
     
-    const { error } = await supabase.auth.signUp({
+    console.log('Attempting signup with redirect to:', redirectTo);
+    console.log('Current origin:', window.location.origin);
+    
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectTo,
+        data: {
+          redirect_url: redirectTo  // Some Supabase configs need this too
+        }
       }
     });
     
+    console.log('Signup response:', { 
+      data, 
+      error,
+      userCreated: data?.user ? 'Yes' : 'No',
+      identities: data?.user?.identities,
+      emailSent: data?.user && !data?.user?.email_confirmed_at ? 'Should be sent' : 'May not send'
+    });
+    
     if (error) throw error;
+    
+    // Check if user already exists (Supabase returns success even if user exists)
+    if (data?.user?.identities?.length === 0) {
+      console.log('User already exists, identities array is empty');
+      throw new Error('User already registered. Please sign in instead.');
+    }
+    
+    if (!data?.user) {
+      throw new Error('Signup failed - no user returned');
+    }
   };
 
   const signIn = async (email: string, password: string) => {

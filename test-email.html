@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Supabase Email</title>
+</head>
+<body>
+    <h1>Test Supabase Email Sending</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        const supabaseUrl = 'https://bkcfpoifzfjhxrgwplck.supabase.co';
+        const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrY2Zwb2lmemZqaHhyZ3dwbGNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjQyNTY4NzUsImV4cCI6MjAzOTgzMjg3NX0.x7xKCBp3A7h1F1xJFjYp3zZW0mC1yCm8hJ_bGGvTuHo';
+        
+        const supabase = createClient(supabaseUrl, supabaseAnonKey);
+        
+        const output = document.getElementById('output');
+        
+        // Generate a random email for testing
+        const testEmail = `test_${Date.now()}@example.com`;
+        const testPassword = 'TestPassword123!';
+        
+        output.innerHTML = `<p>Testing with email: ${testEmail}</p>`;
+        
+        // Try to sign up
+        const { data, error } = await supabase.auth.signUp({
+            email: testEmail,
+            password: testPassword,
+            options: {
+                emailRedirectTo: `${window.location.origin}/#test-confirmation`,
+            }
+        });
+        
+        if (error) {
+            output.innerHTML += `<p style="color:red">Error: ${error.message}</p>`;
+        } else {
+            output.innerHTML += `<p style="color:green">Success! Check response:</p>`;
+            output.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            
+            if (data?.user?.identities?.length === 0) {
+                output.innerHTML += `<p style="color:orange">Note: User might already exist (identities array is empty)</p>`;
+            }
+            
+            if (data?.user?.email_confirmed_at) {
+                output.innerHTML += `<p>Email already confirmed at: ${data.user.email_confirmed_at}</p>`;
+            } else {
+                output.innerHTML += `<p>Email confirmation pending - check if email was sent</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
