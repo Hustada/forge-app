@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Flame, Settings, RotateCcw, CheckCircle, AlertCircle } from 'lucide-react';
+import { Flame, Settings, RotateCcw, CheckCircle, AlertCircle, LogOut } from 'lucide-react';
 
 interface ProgressHeaderProps {
   currentDay: number;
@@ -11,6 +11,8 @@ interface ProgressHeaderProps {
   onReset?: () => void;
   onCompleteDay?: () => void;
   onStartOver?: () => void;
+  onLogout?: () => void;
+  isOfflineMode?: boolean;
 }
 
 export const ProgressHeader: React.FC<ProgressHeaderProps> = ({ 
@@ -21,7 +23,9 @@ export const ProgressHeader: React.FC<ProgressHeaderProps> = ({
   onSettings, 
   onReset,
   onCompleteDay,
-  onStartOver 
+  onStartOver,
+  onLogout,
+  isOfflineMode
 }) => {
   const [showConfirmReset, setShowConfirmReset] = useState(false);
   const getMessage = () => {
@@ -85,6 +89,16 @@ export const ProgressHeader: React.FC<ProgressHeaderProps> = ({
                 title="Settings"
               >
                 <Settings className="w-5 h-5 text-text-muted" />
+              </motion.button>
+            )}
+            {onLogout && !isOfflineMode && (
+              <motion.button
+                onClick={onLogout}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 rounded-lg bg-steel/50 hover:bg-steel transition-colors"
+                title="Sign Out"
+              >
+                <LogOut className="w-5 h-5 text-text-muted" />
               </motion.button>
             )}
           </div>

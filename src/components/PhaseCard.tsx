@@ -23,6 +23,7 @@ interface PhaseCardProps {
   onToggleTask: (taskId: string) => void;
   onCustomTask: (taskId: string, description: string) => void;
   onStepsUpdate: (steps: number) => void;
+  onCompletePhase?: () => void;
 }
 
 const iconMap: Record<string, React.ElementType> = {
@@ -40,7 +41,8 @@ export const PhaseCard: React.FC<PhaseCardProps> = ({
   stepsActual,
   onToggleTask,
   onCustomTask,
-  onStepsUpdate 
+  onStepsUpdate,
+  onCompletePhase 
 }) => {
   const Icon = iconMap[phase.icon] || Flame;
   const [editingCustom, setEditingCustom] = useState<string | null>(null);
@@ -178,6 +180,21 @@ export const PhaseCard: React.FC<PhaseCardProps> = ({
           
           {/* Right side indicators */}
           <div className="flex items-center gap-3">
+            {/* Complete phase button */}
+            {!phaseComplete && onCompletePhase && (
+              <motion.button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCompletePhase();
+                }}
+                whileTap={{ scale: 0.95 }}
+                className="p-1.5 rounded-lg bg-mournshard/20 hover:bg-mournshard/30 transition-colors"
+                title="Complete all tasks in this phase"
+              >
+                <Check className="w-4 h-4 text-mournshard" />
+              </motion.button>
+            )}
+            
             {/* Task dots */}
             <div className="flex gap-1">
               {phase.tasks.map((task, i) => (

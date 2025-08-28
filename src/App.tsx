@@ -12,7 +12,7 @@ import { forgeDB } from './lib/database';
 import { supabase } from './lib/supabase';
 
 function AppContent() {
-  const { user, loading, isOfflineMode } = useAuth();
+  const { user, loading, isOfflineMode, signOut } = useAuth();
   const [dayData, setDayData] = useState(storage.getTodayData());
   const [forgeData, setForgeData] = useState(storage.loadForgeData());
   const [showSettings, setShowSettings] = useState(false);
@@ -143,6 +143,23 @@ function AppContent() {
     }
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    window.location.reload();
+  };
+
+  const handleCompletePhase = async (phaseId: string) => {
+    const phase = PHASES.find(p => p.id === phaseId);
+    if (!phase) return;
+    
+    // Mark all tasks in this phase as complete
+    for (const task of phase.tasks) {
+      if (!dayData.checks[task.id]) {
+        await handleToggleTask(task.id);
+      }
+    }
+  };
+
 
   const progress = storage.calculateProgress(dayData, forgeData);
   const dayComplete = storage.isDayComplete(dayData, forgeData);
@@ -238,6 +255,8 @@ function AppContent() {
         onReset={handleReset}
         onCompleteDay={handleCompleteDay}
         onStartOver={handleStartOver}
+        onLogout={handleLogout}
+        isOfflineMode={isOfflineMode}
       />
 
       {/* Phases */}
@@ -257,6 +276,7 @@ function AppContent() {
               onToggleTask={handleToggleTask}
               onCustomTask={handleCustomTask}
               onStepsUpdate={handleStepsUpdate}
+              onCompletePhase={() => handleCompletePhase(phase.id)}
             />
           </motion.div>
         ))}
