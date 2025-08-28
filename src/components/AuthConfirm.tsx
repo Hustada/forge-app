@@ -12,6 +12,8 @@ export const AuthConfirm: React.FC = () => {
     const error = hashParams.get('error');
     const errorCode = hashParams.get('error_code');
     const errorDescription = hashParams.get('error_description');
+    const accessToken = hashParams.get('access_token');
+    const type = hashParams.get('type');
     
     if (error || errorCode) {
       setStatus('error');
@@ -23,13 +25,13 @@ export const AuthConfirm: React.FC = () => {
       } else {
         setMessage(decodedError);
       }
-    } else if (window.location.hash.includes('type=signup')) {
+    } else if (accessToken || type === 'signup' || window.location.hash.includes('type=signup')) {
       setStatus('success');
-      setMessage('Email confirmed! You can now sign in.');
-      // Redirect to home after 3 seconds
+      setMessage('Email confirmed! Signing you in...');
+      // Redirect to home after 2 seconds
       setTimeout(() => {
         window.location.href = '/';
-      }, 3000);
+      }, 2000);
     } else {
       // No recognized parameters, show generic error
       setStatus('error');

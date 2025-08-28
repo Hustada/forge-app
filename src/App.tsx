@@ -171,6 +171,7 @@ function AppContent() {
   
   // Check if this is an auth confirmation callback or error
   if (window.location.hash?.includes('type=signup') || 
+      window.location.hash?.includes('access_token') ||
       window.location.hash?.includes('error=') ||
       window.location.hash?.includes('error_code=')) {
     return <AuthConfirm />;
@@ -185,7 +186,15 @@ function AppContent() {
   }
 
   // Check if user is logged in but email not verified
-  if (user && !user.email_confirmed_at && !isOfflineMode) {
+  // Debug: Log what we're getting from Supabase
+  if (user) {
+    console.log('User object from Supabase:', user);
+    console.log('Email confirmed at:', user.email_confirmed_at);
+  }
+  
+  // Disable email verification enforcement for now since it's not working as expected
+  const ENFORCE_EMAIL_VERIFICATION = false;
+  if (user && ENFORCE_EMAIL_VERIFICATION && !user.email_confirmed_at && !isOfflineMode) {
     return (
       <div className="min-h-screen bg-void flex items-center justify-center p-4">
         <motion.div

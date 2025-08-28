@@ -56,9 +56,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string) => {
     if (!supabase) throw new Error('Running in offline mode');
     
+    // Use the current origin for redirect to handle both localhost and production
+    const redirectTo = `${window.location.origin}/#type=signup`;
+    
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: redirectTo,
+      }
     });
     
     if (error) throw error;
